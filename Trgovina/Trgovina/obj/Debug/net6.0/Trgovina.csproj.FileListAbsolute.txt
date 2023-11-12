@@ -1,0 +1,14 @@
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\bin\Debug\net6.0\Trgovina.exe
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\bin\Debug\net6.0\Trgovina.deps.json
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\bin\Debug\net6.0\Trgovina.runtimeconfig.json
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\bin\Debug\net6.0\Trgovina.dll
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\bin\Debug\net6.0\Trgovina.pdb
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.AssemblyInfoInputs.cache
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.AssemblyInfo.cs
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.csproj.CoreCompileInputs.cache
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.dll
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\refint\Trgovina.dll
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.pdb
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\Trgovina.genruntimeconfig.cache
+C:\Users\Toni\source\repos\Internship-2-C-Sharp\Trgovina\Trgovina\obj\Debug\net6.0\ref\Trgovina.dll
