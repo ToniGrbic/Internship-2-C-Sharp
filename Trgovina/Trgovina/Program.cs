@@ -3,11 +3,19 @@ using System.ComponentModel.Design;
 using System.Reflection.Metadata.Ecma335;
 
 int state = 0;
-var selectionMain = 0;
-var selectionArticles = 0;
-var selectionWorkers = 0;
-var selectionReceipts = 0;
-var selectionStatistics = 0;
+int selectionMain;
+int selectionArticles;
+int selectionWorkers;
+int selectionReceipts;
+int selectionStatistics;
+
+Dictionary<string, Article> articles = new (){
+
+    {"1", new Article("mlijeko", 20, 1.50f, 21) },
+    {"2", new Article("kruh", 34, 2.50f, 10) },
+    {"3", new Article("jogurt", 30, 1.99f, 30) },
+    {"3", new Article("sir", 24, 1.79f, 30) }
+};
 
 do
 {
@@ -42,12 +50,14 @@ do
             break;
         default:
             Console.WriteLine("Krivi unos pokušaj ponovo, pritisni neku tipku za nastavak...");
-            char chr = Console.ReadKey().KeyChar;
+            char c = Console.ReadKey().KeyChar;
             break;
     }
     Console.Clear();
 
 } while(selectionMain < 0 || selectionMain > 4 || state == (int)ProgramState.CONTINUE);
+
+
 int ArticlesMenu()
 {
     do { 
@@ -81,7 +91,7 @@ int ArticlesMenu()
                 break;
             default:
                 Console.WriteLine("Krivi unos pokušaj ponovo, pritisni neku tipku za nastavak...");
-                char chr = Console.ReadKey().KeyChar;
+                char c = Console.ReadKey().KeyChar;
                 break;
         }
         
@@ -124,7 +134,7 @@ int WorkersMenu()
                 break;
             default:
                 Console.WriteLine("Krivi unos pokušaj ponovo, pritisni neku tipku za nastavak...");
-                char chr = Console.ReadKey().KeyChar;
+                char c = Console.ReadKey().KeyChar;
                 break;
         }
         
@@ -157,7 +167,7 @@ int ReceiptsMenu()
                 break;
             default:
                 Console.WriteLine("Krivi unos pokušaj ponovo, pritisni neku tipku za nastavak...");
-                char chr = Console.ReadKey().KeyChar;
+                char c = Console.ReadKey().KeyChar;
                 break;
         }
         
@@ -170,7 +180,7 @@ int StatisticsMenu()
     do
     {
         Console.WriteLine(
-           "IZBORNIK - Računi\n" +
+           "IZBORNIK - Statistika\n" +
            "1 - Ukupan broj artikala\n" +
            "2 - Vrijednost neprodanih artikala\n" +
            "3 - Vrijednost prodanih artikala\n" +
@@ -281,13 +291,19 @@ void DeleteArticles()
 
 
 
-public struct Artikl
+public struct Article
 {
     public string name;
     public int amount;
     public float price;
-    public int numOfDaysTillExpiration;
-
+    public int numOfDaysTillExp;
+    public Article(string name, int amout, float price, int numOfDaysTillExp) : this()
+    {
+        this.name = name;
+        this.amount = amout;
+        this.price = price;
+        this.numOfDaysTillExp = numOfDaysTillExp;
+    }
 }
 
 public struct Radnik
@@ -301,10 +317,9 @@ public struct Radnik
 
 public struct Racun
 {
-    public string ID;
     public DateTime dateAndTime;
     public float price;
-    public Artikl[] articles;  
+    public Article[] articles;  
 }
 
 enum ProgramState
