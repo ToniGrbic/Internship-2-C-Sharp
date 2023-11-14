@@ -89,7 +89,7 @@ void ArticlesMenu(Dictionary<string, Article> articles)
                 DeleteArticles(articles);
                 break;
             case 3:
-                EditArticles();
+                EditArticles(articles);
                 break;
             case 4:
                 PrintArticlesOptions(articles);
@@ -229,7 +229,7 @@ void StatisticsMenu()
 }
 
 
-// *********************** FUNKCIJE ZA ARTIKLE *********************************
+// ************************** FUNKCIJE ZA ARTIKLE *********************************
 void PrintArticlesOptions(Dictionary<string, Article> articles)
 {
     int statePrintOptions;
@@ -305,9 +305,68 @@ void PrintArticlesOptions(Dictionary<string, Article> articles)
 }  
 
 
-void EditArticles()
-{
-    Console.WriteLine("TODO\n");
+void EditArticles(Dictionary<string, Article> articles)
+{ 
+    int stateEditArticles;
+    string option;
+    string articleName;
+    int newAmount;
+    float newPrice;
+    int newDaysTillExpiration;
+    do
+    {
+        stateEditArticles = (int)Loop.TERMINATE;
+        Console.WriteLine(
+            "OPCIJE - UREĐIVANJA ARTIKALA\n" +
+            "a - Jednog artikla\n" +
+            "b - Dodavanje popusta/poskupljenje na sve proizvode\n"
+        );
+        option = Console.ReadLine()?.ToLower();
+        switch (option)
+        {
+            case "a":
+                do{
+                    stateEditArticles = (int)Loop.TERMINATE;
+                    Console.WriteLine("Unesi ime artikla kojeg želiš urediti: ");
+                    articleName = InputNonEmptyString();
+                    if (!articles.ContainsKey(articleName)){
+                        Console.WriteLine($"Artikl {articleName} ne postoji u bazi, pokušaj ponovno...\n");
+                        stateEditArticles = (int)Loop.CONTINUE;
+                        continue;
+                    }
+                    var articleToEdit = articles[articleName];
+                    PrintSingleArticle(new(articleName, articleToEdit));
+                   
+                    Console.WriteLine("Uredi količinu? (da/ne): ");
+                    if (ConfirmationDialog() == 0){
+                        newAmount = InputNumberFormat();
+                        articleToEdit.amount = newAmount;
+                    }
+                    Console.WriteLine("Uredi cijenu? (da/ne): ");
+                    if (ConfirmationDialog() == 0){
+                        newPrice = InputFloatFormat();
+                        articleToEdit.price = newPrice;
+                    }
+                    Console.WriteLine("Uredi cijenu? (da/ne): ");
+                    if (ConfirmationDialog() == 0){
+                        newDaysTillExpiration = InputNumberFormat();
+                        articleToEdit.numOfDaysTillExp = newDaysTillExpiration;
+                    }
+                    articles[articleName] = articleToEdit;
+                    Console.WriteLine($"Artikl {articleName} uspiješno uređen\n");
+                    PrintSingleArticle(new(articleName, articles[articleName]));
+                } while (stateEditArticles == (int)Loop.CONTINUE);
+                break;
+            case "b":
+                break;
+            default:
+                Console.WriteLine("Pogrešan unos, pokušaj ponovo...");
+                stateEditArticles = (int)Loop.CONTINUE;
+                break;
+        }
+        
+
+    } while (stateEditArticles == (int)Loop.CONTINUE);
 }
 
 void AddArticles(Dictionary<string, Article> articles)
@@ -335,8 +394,6 @@ void AddArticles(Dictionary<string, Article> articles)
         daysTillExpiration = InputNumberFormat();
 
         article = new Article(amount, price, daysTillExpiration);
-       
-        
         PrintSingleArticle(new(name,article));
         Console.WriteLine("POTVRDI UNOS ARTIKLA (da - ZA POTVRDU, ne - PONOVNI UNOS):");
         stateAddArticles = ConfirmationDialogForDataChange();
@@ -345,6 +402,7 @@ void AddArticles(Dictionary<string, Article> articles)
             Console.Clear();
             continue;
         }
+
         articles.Add(name, article);
         Console.WriteLine($"Artikl {name} je uspješno dodan!\n\n");
        
@@ -383,17 +441,18 @@ void DeleteArticles(Dictionary<string, Article> articles)
                     Console.WriteLine($"Potvrdi brisanje artikla {articleName} (da - za nastavak, ne - novi unos\n");
                     stateDeleteArticles = ConfirmationDialogForDataChange();
 
-                    if (stateDeleteArticles == (int)Loop.CONTINUE){
-                        Console.Clear();
-                        continue;
-                    }
-
-                    if (!articles.Remove(articleName)){
+                    if (!articles.ContainsKey(articleName)){
                         Console.WriteLine("Taj artilk ne postoji u bazi, pokušaj ponovo...\n");
                         stateDeleteArticles = (int)Loop.CONTINUE;
-                    }    
-                    Console.WriteLine($"izbrisan artikl {articleName} - {articleName}\n");
-                    
+                        continue;
+                    }
+                    Console.WriteLine($"Potvrdi brisanje artikla {articleName} (da - za nastavak, ne - novi unos\n");
+                    stateDeleteArticles = ConfirmationDialogForDataChange();
+
+                    if(stateDeleteArticles == (int)Loop.TERMINATE){
+                        articles.Remove(articleName);
+                        Console.WriteLine($"izbrisan artikl {articleName} - {articleName}\n");
+                    }
                     
                 } while (stateDeleteArticles == (int)Loop.CONTINUE);  
                 break;
