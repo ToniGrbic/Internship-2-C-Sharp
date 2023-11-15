@@ -3,6 +3,7 @@ using System.Collections;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography.X509Certificates;
 using System.Xml.Linq;
 
 int selectionMain;
@@ -27,8 +28,6 @@ Dictionary<string, DateTime> workers = new(){
     {"Sime Simic", new DateTime(1998, 11, 15)},
     {"Ivan Ivic",  new DateTime(1999, 10, 30)}
 };
-
-
 
 // ********************* GLAVNI IZBORNIK ************************
 do
@@ -348,6 +347,7 @@ void EditArticles(Dictionary<string, Article> articles)
                     stateEditArticles = (int)Loop.TERMINATE;
                     Console.WriteLine("Unesi ime artikla kojeg želiš urediti: ");
                     articleName = InputNonEmptyString();
+
                     if (!articles.ContainsKey(articleName)){
                         Console.WriteLine($"Artikl {articleName} ne postoji u bazi, pokušaj ponovno...\n");
                         stateEditArticles = (int)Loop.CONTINUE;
@@ -381,7 +381,35 @@ void EditArticles(Dictionary<string, Article> articles)
                 } while (stateEditArticles == (int)Loop.CONTINUE);
                 break;
             case "b":
-                //TODO
+                int percentage;
+                bool discount = true;
+                Console.WriteLine(
+                    "Unesi postotak (%) za poskupljenje/popust svih proizvoda\n" +
+                    "(NPR. za poskupljenje: 15, a za popust: -15): "
+                );
+                percentage = InputNumberFormat();
+                if (percentage > 0)
+                    discount = false;
+                Console.WriteLine($"Potvrdi {(discount ? "Popust": "Poskupljenje")} od {percentage}% ? (da/ne): ");
+                stateEditArticles = ConfirmationDialogForDataChange();
+
+                if(stateEditArticles == (int)Loop.CONTINUE){
+                    Console.Clear();
+                    continue;
+                }
+
+                float percentageDec = (float)percentage / 100;
+                List<string> keys = new (articles.Keys);
+                foreach(var key in keys)
+                {
+                    var article = articles[key];
+                    article.price += percentageDec*article.price;
+                    Console.WriteLine($"Nova cijena arikla {key} je {article.price}\n");
+                    articles[key] = article;
+                }
+                PrintArticles(articles);
+                Console.WriteLine("Uspiješno uređivanje cijena artikala\n");
+                ContinueAndClearConsole();
                 break;
             case "exit":
                 stateEditArticles = (int)Loop.TERMINATE;
@@ -392,8 +420,6 @@ void EditArticles(Dictionary<string, Article> articles)
                 stateEditArticles = (int)Loop.CONTINUE;
                 break;
         }
-        
-
     } while (stateEditArticles == (int)Loop.CONTINUE);
 }
 
@@ -611,11 +637,45 @@ void AddWorkers(Dictionary<string, DateTime> workers)
     } while (stateAddWorkers == (int)Loop.CONTINUE);
 }
 
-
-
 void EditWorkers(Dictionary<string, DateTime> workers)
 {
-    Console.WriteLine("TODO\n");
+    int stateEditWorkers;
+    string workerName;
+    DateTime dateOfBirth;
+    do
+    {
+        stateEditWorkers = (int)Loop.TERMINATE;
+
+        Console.WriteLine("Unesi ime radnika kojeg želiš urediti: ");
+        workerName = InputNonEmptyString();
+        if (!workers.ContainsKey(workerName))
+        {
+            Console.WriteLine($"Artikl {workerName} ne postoji u bazi, pokušaj ponovno...\n");
+            stateEditWorkers = (int)Loop.CONTINUE;
+            continue;
+        }
+        
+        PrintSingleWorker(new(workerName, workers[workerName]));
+
+        Console.WriteLine("Uredi datum rođenja? (da/ne): ");
+        if (ConfirmationDialog() == 0)
+        {
+            Console.WriteLine("Unesi novi datum rođenja: ");
+            dateOfBirth = InputDateFormat();
+           
+            workers[workerName] = dateOfBirth;
+            Console.WriteLine($"Artikl {workerName} uspiješno uređen\n");
+        }
+        PrintSingleWorker(new(workerName, workers[workerName]));
+
+        Console.WriteLine(
+            "Nastavi sa novim uređivanjem?\n" +
+            "(da - ZA NASTAVAK, ne - POVRATAK NA IZBORNIK RADNICI): \n"
+        );
+        stateEditWorkers = ConfirmationDialog();
+        Console.Clear();
+
+    } while (stateEditWorkers == (int)Loop.CONTINUE);
 }
 
 void DeleteWorkers(Dictionary<string, DateTime> workers)
@@ -787,11 +847,11 @@ DateTime InputDateFormat()
 {
     int year, month, day;
  
-    Console.WriteLine("\tGodina: ");
+    Console.WriteLine("Godina: ");
     year = InputNumberFormat();
-    Console.WriteLine("\tMjesec: ");
+    Console.WriteLine("Mjesec: ");
     month = InputNumberFormat();
-    Console.WriteLine("\tDan: ");
+    Console.WriteLine("Dan: ");
     day = InputNumberFormat();
 
     DateTime date = new DateTime(year, month, day);
@@ -819,7 +879,7 @@ void PrintSingleArticle(KeyValuePair<string, Article> article)
     Console.WriteLine(
         $"ARTICLE {key} : \n" +
         $"amount: {value.amount}\n" +
-        $"price: {value.price}\n" +
+        $"price: {value.price:0.00}\n" +
         $"days till expiration: {value.numOfDaysTillExp}\n\n"
     );
 }
