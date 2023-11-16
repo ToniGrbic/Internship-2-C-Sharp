@@ -12,24 +12,45 @@ int selectionWorkers;
 int selectionReceipts;
 int selectionStatistics;
 int stateMainMenu = (int)Loop.CONTINUE;
+string pass = "Stats_123";
 
 Dictionary<string, Article> articles = new (){
 
-    {"mlijeko", new Article(20, 1.50f, 0)},
-    {"kruh",    new Article(34, 2.50f, 10)},
+    {"mlijeko", new Article(20, 1.50f, 12)},
+    {"kruh",    new Article(5, 2.50f, 10)},
     {"jogurt",  new Article(30, 1.99f, 0)},
-    {"sir",     new Article(24, 1.79f, 30)}
+    {"sir",     new Article(24, 2.99f, 30)}
 };
 
 Dictionary<string, DateTime> workers = new(){
 
     {"Ante Antic", new DateTime(2000, 08, 12)},
     {"Mate Matic", new DateTime(2001, 12, 20)},
-    {"Sime Simic", new DateTime(1998, 11, 15)},
+    {"Sime Simic", new DateTime(1956, 11, 15)},
     {"Ivan Ivic",  new DateTime(1999, 10, 30)}
 };
 
-// ********************* GLAVNI IZBORNIK ************************
+Dictionary<int, (DateTime dateTime, float totalPrice, Dictionary<string,(int amount,float price)> articles)> receipts = new()
+{
+    {1, (dateTime: new DateTime(2023,10,31,12,5,0), 
+         totalPrice: 7.5f, 
+         articles: new (){ 
+             { "mlijeko", (amount:3, price:1.5f) }, 
+             { "sir", (amount:1, price:2.99f)} 
+         })
+    },
+    {2, (dateTime: new DateTime(2023,11,10,16,25,0), 
+         totalPrice: 9.0f, 
+         articles: new (){ 
+             { "kruh", (amount: 2, price: 2.50f) }, 
+             { "jogurt", (amount: 2, price: 1.99f) } 
+         }) 
+    },
+};
+
+
+// ***************************** GLAVNI IZBORNIK ***************************
+// *************************************************************************
 do
 {
     Console.WriteLine(
@@ -41,7 +62,7 @@ do
         "0 - Izlaz\n\n"
     );
     Console.WriteLine("Unesi odabir: ");
-    selectionMain = int.Parse(Console.ReadLine());
+    selectionMain = InputNumberFormat();
 
     switch (selectionMain)
     {
@@ -56,7 +77,7 @@ do
             WorkersMenu(workers);
             break;
         case 3:
-            ReceiptsMenu();
+            ReceiptsMenu(receipts);
             break;
         case 4:
             StatisticsMenu();
@@ -71,7 +92,8 @@ do
 } while(stateMainMenu == (int)Loop.CONTINUE || selectionMain < 0 || selectionMain > 4);
 
 
-// *********************** PODIZBORNIK ARTIKLI **************************
+// ***************************** ARTIKLI ********************************
+// **********************************************************************
 void ArticlesMenu(Dictionary<string, Article> articles)
 {
     int stateArticles = (int)Loop.CONTINUE;
@@ -117,6 +139,7 @@ void ArticlesMenu(Dictionary<string, Article> articles)
 }
 
 // *********************** PODIZBORNIK RADNICI **************************
+// **********************************************************************
 void WorkersMenu(Dictionary<string, DateTime> workers)
 {
     int stateWorkersMenu = (int)Loop.CONTINUE;
@@ -161,7 +184,8 @@ void WorkersMenu(Dictionary<string, DateTime> workers)
 }
 
 // *********************** PODIZBORNIK RAČUNI **************************
-void ReceiptsMenu()
+// *********************************************************************
+void ReceiptsMenu(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)> articles)> receipts)
 {
     int stateReceiptsMenu = (int)Loop.CONTINUE;
     do{
@@ -181,10 +205,10 @@ void ReceiptsMenu()
                 stateReceiptsMenu = (int)Loop.TERMINATE;
                 break;
             case 1:
-                AddReceipt();
+                AddReceipt(receipts);
                 break;
             case 2:
-                PrintReceipt();
+                PrintReceipts(receipts);
                 break;
             default:
                 Console.WriteLine("Pogrešan unos pokušaj ");
@@ -196,6 +220,7 @@ void ReceiptsMenu()
 }
 
 // *********************** PODIZBORNIK STATISTIKA **************************
+// *************************************************************************
 void StatisticsMenu()
 {
     int stateStatisticsMenu = (int)Loop.CONTINUE;
@@ -210,7 +235,7 @@ void StatisticsMenu()
            "0 - NAZAD NA GLAVNI MENI\n"
         );
         Console.WriteLine("Unesi odabir: ");
-        selectionStatistics = int.Parse(Console.ReadLine());
+        selectionStatistics = InputNumberFormat();
 
         switch (selectionStatistics)
         {
@@ -240,7 +265,8 @@ void StatisticsMenu()
 }
 
 
-// ************************** FUNKCIJE ZA ARTIKLE *********************************
+// ***************************** FUNKCIJE ZA ARTIKLE ******************************
+// ********************************************************************************
 void PrintArticlesOptions(Dictionary<string, Article> articles)
 {
     int statePrintOptions;
@@ -477,7 +503,7 @@ void DeleteArticles(Dictionary<string, Article> articles)
     do{
         Console.WriteLine(
             "OPCIJE - BRISANJE ARTIKALA\n" +
-            "a - po imenu\r\n" +
+            "a - po imenu\n" +
             "b - kojima je istekao rok trajanja\n" +
             "exit - POVRATAK NA IZBORNIK ARTIKLI"
 
@@ -549,6 +575,7 @@ void DeleteArticles(Dictionary<string, Article> articles)
 }
 
 // *********************** FUNKCIJE ZA RADNIKE *********************************
+// *****************************************************************************
 void PrintWorkers(Dictionary<string, DateTime> workers)
 {
     int statePrintOptions;
@@ -768,17 +795,155 @@ void DeleteWorkers(Dictionary<string, DateTime> workers)
    
 }
 // *********************** FUNKCIJE ZA RAČUNE *********************************
-void PrintReceipt()
+// ****************************************************************************
+
+void PrintReceipts(Dictionary<int, (DateTime date, float totalPrice, Dictionary<string, (int, float)> articles)> receipts)
 {
-    Console.WriteLine("TODO\n");
+    int statePrintReceipts;
+    int inputID;
+    bool success;
+    do{
+        statePrintReceipts = (int)Loop.CONTINUE;
+        Console.WriteLine(
+            "ISPIS SVIH RAČUNA:\n" +
+            "**********************************\n"
+        );
+        foreach (var (Key, Value) in receipts)
+        {
+            Console.WriteLine(
+             $"RAČUN: ID - {Key}\n" +
+             $"Datum izdavanja: {Value.date}\n" +
+             $"UKUPNO: {Value.totalPrice} EUR\n" +
+             "**********************************\n"
+            );
+        }
+
+        Console.WriteLine(
+            "nastavi dalje sa ispisom pojeding artikla?\n" +
+            "(da - NASTAVAK ne - povratak na izbornik Računi):"
+        );
+        statePrintReceipts = ConfirmationDialog();
+        if (statePrintReceipts == (int)Loop.TERMINATE)
+        {
+            Console.Clear();
+            continue;
+        }
+
+        do{
+            Console.WriteLine("Unesi ID računa za ispis: ");
+            inputID = InputNumberFormat();
+            success = receipts.ContainsKey(inputID);
+            if (!success)
+                Console.WriteLine($"Greška: Nepostoji Račun sa ID: {inputID}, pokušaj ponovo");
+
+        } while (!success);
+        PrintReceiptWithDetails(inputID, receipts[inputID]);
+        ContinueAndClearConsole();
+
+    } while (statePrintReceipts == (int)Loop.CONTINUE);
 }
 
-void AddReceipt()
+void PrintReceiptWithDetails(int receiptID, (DateTime date, float totalPrice, Dictionary<string,(int,float)>articles) receipt)
 {
-    Console.WriteLine("TODO\n");
+        Console.WriteLine(
+            $"RAČUN: ID - {receiptID}\n" +
+            $"Datum izdavanja: {receipt.date}\n"
+        );
+        PrintReceiptArticles(receipt.articles);
+        Console.WriteLine(
+            $"UKUPNO: {receipt.totalPrice} EUR\n" +
+            "**********************************\n"
+        );
 }
 
-// *********************** FUNKCIJE ZA STATISTIKU *******************************
+void PrintReceiptArticles(Dictionary<string, (int amount,float price)> receiptArticles)
+{
+    Console.WriteLine("ARTIKLI:\n");
+    foreach (var (Key, Value) in receiptArticles)
+    {
+        Console.WriteLine(
+            $"\tIME: {Key}\n" +
+            $"\tKOLIČINA: {Value.amount}\n" +
+            $"\tCIJENA: {Value.amount*Value.price} EUR\n"
+        );
+    }
+  
+}
+
+void AddReceipt(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)>)> receipts)
+{
+    int stateAddReceiptItems;
+    int stateAddReceipts;
+    string articleName;
+    int amount; 
+    float receiptTotalPrice = 0;
+    int receiptID = receipts.Keys.Last() + 1;
+    DateTime receiptDate = DateTime.Now;
+    Dictionary<string, (int, float)> receiptArticles = new() { };
+
+    do{
+        PrintArticles(articles);
+        stateAddReceipts = (int)Loop.CONTINUE;
+        do{
+            stateAddReceiptItems = (int)Loop.CONTINUE;
+            Console.WriteLine("UNOS PROIZVODA I KOLIČINA:\n");
+            Console.WriteLine("Unesi ime proizvoda: ");
+            articleName = InputNonEmptyString().ToLower();
+            if (!articles.ContainsKey(articleName))
+            {
+                Console.WriteLine($"Greška: Artikl {articleName} ne postoji u bazi, pokušaj ponovo\n");
+                ContinueAndClearConsole();
+                continue;
+            }
+            
+            var article = articles[articleName];
+            float articlePrice = article.price;
+
+            do{
+                Console.WriteLine("Unesi količinu proizvoda: ");
+                amount = InputNumberFormat();
+                if (amount > article.amount)
+                    Console.WriteLine($"Greška: Ukupni broj artikala {articleName} u bazi je manji od {amount}, pokušaj ponovo\n");
+            } while (amount > article.amount);
+
+            Console.WriteLine($"Potvrdi unos artikla (da/ne): ");
+            if (ConfirmationDialogForDataChange() == (int)Loop.CONTINUE)
+                continue;
+
+            Console.WriteLine(
+                "nasatavi sa sljedećim unosom proizvoda?\n" +
+                "(da - NASTAVAK, ne - ISPIS RAČUNA\n"
+            );
+            stateAddReceiptItems = ConfirmationDialog();
+            Console.Clear();
+
+            receiptArticles.Add(articleName, (amount, articlePrice));
+            receiptTotalPrice += articlePrice * amount;
+            article.amount -= amount;
+
+            if (article.amount <= 0)
+                articles.Remove(articleName);
+            else{
+                articles[articleName] = article;
+            }
+                
+        } while (stateAddReceiptItems == (int)Loop.CONTINUE);
+
+        var receipt = (date: receiptDate, totalPrice: receiptTotalPrice, articles: receiptArticles);
+        receipts.Add(receiptID, receipt);
+
+        PrintReceiptWithDetails(receiptID, receipts[receiptID]);
+        Console.WriteLine(
+             "nasatavi sa kreiranjem sljedećeg računa?\n" +
+             "(da - NASTAVAK, ne - povratak na meni RAČUNI\n"
+        );
+        stateAddReceipts = ConfirmationDialog();
+        Console.Clear();
+    } while (stateAddReceipts == (int)Loop.CONTINUE);
+}
+
+// *********************** FUNKCIJE ZA STATISTIKU *****************************
+// ****************************************************************************
 void StateByMonth()
 {
     Console.WriteLine("TODO\n");
@@ -800,6 +965,7 @@ void TotalNumberOfArticles()
 }
 
 // *********************** HELPER FUNKCIJE *************************
+// *****************************************************************
 void ContinueAndClearConsole()
 {
     Console.WriteLine("pritisni neku tipku za nastavak...");
