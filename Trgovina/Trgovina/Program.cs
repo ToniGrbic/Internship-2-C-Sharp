@@ -1,11 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.Collections;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml.Linq;
-
 int selectionMain;
 int selectionArticles;
 int selectionWorkers;
@@ -48,12 +41,11 @@ new()
     },
 };
 
-
 // ***************************** GLAVNI IZBORNIK ***************************
 // *************************************************************************
 do{
     Console.WriteLine(
-        "MENI:\n" +
+        "GLAVNI IZBORNIK:\n" +
         "1 - Artikli\n" +
         "2 - Radnici\n" +
         "3 - Računi\n" +
@@ -222,16 +214,20 @@ void ReceiptsMenu(Dictionary<int, (DateTime, float, Dictionary<string, (int,floa
 void StatisticsMenu()
 {
     int stateStatisticsMenu = (int)Loop.CONTINUE;
+    
     Console.WriteLine("Unesi sifru za pristup: ");
     string inputedPass = InputNonEmptyString();
 
     if (!CheckPassword(inputedPass)){
-        Console.WriteLine("Neispravna lozinka, pokušaj ponovo\n");
+        Console.WriteLine("Neispravna lozinka, pristup odbijen!\n");
         ContinueAndClearConsole();
         return;
     }
+    Console.Clear();
+    Console.WriteLine("USPJEŠNA PRIJAVA\n\n");
 
-    do{
+    do
+    {
         Console.WriteLine(
            "IZBORNIK - Statistika\n" +
            "1 - Ukupan broj artikala\n" +
@@ -250,7 +246,7 @@ void StatisticsMenu()
                 stateStatisticsMenu = (int)Loop.TERMINATE;
                 break;
             case 1:
-                TotalNumberOfArticles();
+                TotalNumberOfArticles(articles);
                 break;
             case 2:
                 ValueOfNonsoldArticles();
@@ -357,7 +353,6 @@ void PrintArticlesOptions(Dictionary<string, Article> articles)
 
     } while (statePrintOptions == (int)Loop.CONTINUE);
 }  
-
 
 void EditArticles(Dictionary<string, Article> articles)
 { 
@@ -955,22 +950,86 @@ void AddReceipt(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)
 // ****************************************************************************
 void StateByMonth()
 {
-    Console.WriteLine("TODO\n");
+    int loopState;
+    do
+    {
+        loopState = (int)Loop.CONTINUE;
+        Console.WriteLine("Unesi godinu i mjesec za prikaz stanja:");
+        int year = InputYear();
+        int month = InputMonth();
+
+        Console.WriteLine("Unesi iznos place za jednog radnika (EUR):");
+        float monthlySalary = InputFloatFormat();
+        float totalSalaries = monthlySalary * workers.Count;
+
+        Console.WriteLine($"Unesi iznos najma (EUR):");
+        float rent = InputFloatFormat();
+        Console.WriteLine($"Unesi iznos ostalih troskova (EUR):");
+        float restOfExpences = InputFloatFormat();
+        Console.WriteLine("Potvrdi unos podataka? (da - ispis stanja, ne - ponovni unos)");
+
+        if (ConfirmationDialog() != 0)
+            continue;
+
+        Console.WriteLine("************************************\n");
+        float totalProfitByMonth = 0.0f;
+        foreach (var (Key, Value) in receipts)
+        {
+            if (Value.dateTime.Month == month && Value.dateTime.Year == year)
+                totalProfitByMonth += Value.totalPrice;
+        }
+
+        Console.WriteLine($"Ukupna zarada u {month}. {year}. je: {totalProfitByMonth:0.00} EUR\n");
+        Console.WriteLine($"Ukupni iznos plaća svih radnika: {totalSalaries:0.00} EUR\n");
+        Console.WriteLine($"Ostali troškovi: {restOfExpences}\n\n");
+
+        float ROI = totalProfitByMonth * (1 / 3) - totalSalaries - restOfExpences;
+        Console.WriteLine($"Povrat ulaganja za {month}. {year}: {ROI:0.00} EUR\n");
+        if (ROI > 0)
+            Console.WriteLine("ZARADA\n");
+        else if (ROI < 0)
+            Console.WriteLine("GUBITAK\n");
+
+        Console.WriteLine(
+              "nasatavi sa provjerom iduceg stanja?\n" +
+              "(da - NASTAVAK, ne - povratak na meni STATISTIKA\n"
+        );
+        loopState = ConfirmationDialog();
+        Console.Clear();
+    } while (loopState == (int)Loop.CONTINUE);
 }
 
 void ValueOfSoldArticles()
 {
-    Console.WriteLine("TODO\n");
+    float valueOfSoldArticles = 0.0f;
+    foreach (var (Key, Value) in articles)
+    {
+        valueOfSoldArticles += Value.soldAmount*Value.price;
+    }
+    Console.WriteLine($"VRIJEDNOST SVIH PRODANIH ARTIKALA: {valueOfSoldArticles:0.00} EUR\n");
+    ContinueAndClearConsole();
 }
 
 void ValueOfNonsoldArticles()
 {
-    Console.WriteLine("TODO\n");
+    float valueOfNonSoldArticles = 0.0f;
+    foreach (var (Key, Value) in articles)
+    {
+        valueOfNonSoldArticles += Value.amount * Value.price;
+    }
+    Console.WriteLine($"VRIJEDNOST SVIH NEPRODANIH ARTIKALA: {valueOfNonSoldArticles:0.00} EUR\n");
+    ContinueAndClearConsole();
 }
 
-void TotalNumberOfArticles()
+void TotalNumberOfArticles(Dictionary<string, Article> articles)
 {
-    Console.WriteLine("TODO\n");
+    int totalAmount = 0;
+    foreach(var article in articles)
+    {
+        totalAmount += article.Value.amount;
+    }
+    Console.WriteLine($"UKUPNI BROJ ARTIKALA U TRGOVINI: {totalAmount}\n");
+    ContinueAndClearConsole();
 }
 
 // *********************** HELPER FUNKCIJE *************************
@@ -989,7 +1048,7 @@ int InputNumberFormat()
     do{
         success = int.TryParse(Console.ReadLine(), out number);
         if (!success)
-            Console.WriteLine("Neispravni format za cjeli broj, pokušaj ponovo...");
+            Console.WriteLine("Greška: Neispravni format za cjeli broj, pokušaj ponovo...");
     } while (!success);
     return number;
 }
@@ -1001,7 +1060,7 @@ float InputFloatFormat()
     do{
         success = float.TryParse(Console.ReadLine(), out number);
         if (!success)
-            Console.WriteLine("Neispravni format za decinalni broj, pokušaj ponovo...");
+            Console.WriteLine("Greška: Neispravni format za decinalni broj, pokušaj ponovo...");
     } while (!success);
     return number;
 }
@@ -1014,23 +1073,60 @@ string InputNonEmptyString()
         input = Console.ReadLine();
         success = !string.IsNullOrEmpty(input);
         if (!success)
-            Console.WriteLine("string ne smije biti prazan, pokušajte ponovo...");
+            Console.WriteLine("Greška: string ne smije biti prazan, pokušajte ponovo...");
     } while (!success);
     return input;
 }
 DateTime InputDateFormat()
 {
     int year, month, day;
- 
-    Console.WriteLine("Godina: ");
-    year = InputNumberFormat();
-    Console.WriteLine("Mjesec: ");
-    month = InputNumberFormat();
-    Console.WriteLine("Dan: ");
-    day = InputNumberFormat();
+    bool success;
 
+    year = InputYear();
+    month = InputMonth();
+
+    do{
+        Console.WriteLine("DAN (prihvatiljive vrijednosti: 01-31): ");
+        day = InputNumberFormat();
+        success = (day >= 1) && (day <= 31);
+        if (!success)
+            Console.WriteLine($"Greška: {day} nije prihvatljiva vrijednost za DAN, pokušaj ponovo\n");
+    } while (!success);
+    
     DateTime date = new DateTime(year, month, day);
     return date;
+}
+
+int InputYear()
+{
+    int maxYear = DateTime.Now.Year;
+    int minYear = DateTime.Now.Year - 70;
+    bool success;
+    int year;
+
+    do{
+        Console.WriteLine($"GODINA (prihvatljive vrijednosti: {minYear}-{maxYear}): ");
+        year = InputNumberFormat();
+        success = (year >= minYear) && (year <= maxYear);
+        if (!success)
+            Console.WriteLine($"Greška: {year} nije prihvatljiva vrijednost za GODINU, pokušaj ponovo\n");
+    } while (!success);
+    return year;
+}
+
+int InputMonth()
+{
+    bool success;
+    int month;
+    do
+    {
+        Console.WriteLine("MJESEC (prihvatiljive vrijednosti: 01-12): ");
+        month = InputNumberFormat();
+        success = (month >= 1) && (month <= 12);
+        if (!success)
+            Console.WriteLine($"Greška: {month} nije prihvatljiva vrijednost za MJESEC, pokušaj ponovo\n");
+    } while (!success);
+    return month;
 }
 
 int AgeOfWorker(DateTime start)
