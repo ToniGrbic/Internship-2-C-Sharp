@@ -12,14 +12,13 @@ int selectionWorkers;
 int selectionReceipts;
 int selectionStatistics;
 int stateMainMenu = (int)Loop.CONTINUE;
-string pass = "Stats_123";
 
 Dictionary<string, Article> articles = new (){
 
-    {"mlijeko", new Article(20, 1.50f, 12)},
-    {"kruh",    new Article(5, 2.50f, 10)},
-    {"jogurt",  new Article(30, 1.99f, 0)},
-    {"sir",     new Article(24, 2.99f, 30)}
+    {"mlijeko", new Article(20, 1.50f, 12, 10)},
+    {"kruh",    new Article(5,  2.50f, 10, 20)},
+    {"jogurt",  new Article(30, 1.99f, 0,  30)},
+    {"sir",     new Article(24, 2.99f, 30, 15)}
 };
 
 Dictionary<string, DateTime> workers = new(){
@@ -30,7 +29,8 @@ Dictionary<string, DateTime> workers = new(){
     {"Ivan Ivic",  new DateTime(1999, 10, 30)}
 };
 
-Dictionary<int, (DateTime dateTime, float totalPrice, Dictionary<string,(int amount,float price)> articles)> receipts = new()
+Dictionary<int, (DateTime dateTime, float totalPrice, Dictionary<string,(int amount,float price)> articles)> receipts =
+new()
 {
     {1, (dateTime: new DateTime(2023,10,31,12,5,0), 
          totalPrice: 7.5f, 
@@ -51,8 +51,7 @@ Dictionary<int, (DateTime dateTime, float totalPrice, Dictionary<string,(int amo
 
 // ***************************** GLAVNI IZBORNIK ***************************
 // *************************************************************************
-do
-{
+do{
     Console.WriteLine(
         "MENI:\n" +
         "1 - Artikli\n" +
@@ -98,7 +97,7 @@ void ArticlesMenu(Dictionary<string, Article> articles)
 {
     int stateArticles = (int)Loop.CONTINUE;
 
-    do { 
+    do{ 
         Console.WriteLine(
            "IZBORNIK - Artikli\n" +
            "1 - Unos artikla\n" +
@@ -143,8 +142,7 @@ void ArticlesMenu(Dictionary<string, Article> articles)
 void WorkersMenu(Dictionary<string, DateTime> workers)
 {
     int stateWorkersMenu = (int)Loop.CONTINUE;
-    do
-    {
+    do{
         Console.WriteLine(
            "IZBORNIK - Radnici\n" +
            "1 - Unos radnika\n" +
@@ -224,8 +222,16 @@ void ReceiptsMenu(Dictionary<int, (DateTime, float, Dictionary<string, (int,floa
 void StatisticsMenu()
 {
     int stateStatisticsMenu = (int)Loop.CONTINUE;
-    do
-    {
+    Console.WriteLine("Unesi sifru za pristup: ");
+    string inputedPass = InputNonEmptyString();
+
+    if (!CheckPassword(inputedPass)){
+        Console.WriteLine("Neispravna lozinka, pokušaj ponovo\n");
+        ContinueAndClearConsole();
+        return;
+    }
+
+    do{
         Console.WriteLine(
            "IZBORNIK - Statistika\n" +
            "1 - Ukupan broj artikala\n" +
@@ -262,6 +268,12 @@ void StatisticsMenu()
         }
         
     } while (stateStatisticsMenu == (int)Loop.CONTINUE || selectionStatistics < 0 || selectionStatistics > 4);
+}
+
+bool CheckPassword(string inputedPass)
+{
+    string passwordDefault = "Stats123";
+    return inputedPass == passwordDefault;
 }
 
 
@@ -311,14 +323,14 @@ void PrintArticlesOptions(Dictionary<string, Article> articles)
                 break;
             case "e":
                 var mostSoldArticle = 
-                    articles.OrderByDescending(pair => pair.Value.numOfDaysTillExp).First();
+                    articles.OrderByDescending(pair => pair.Value.soldAmount).First();
 
                 Console.WriteLine("NAJVIŠE PRODAVANI ARTIKL:\n");
                 PrintSingleArticle(mostSoldArticle);
                 break;
             case "f":
                 var leastSoldArticle =
-                    articles.OrderBy(pair => pair.Value.numOfDaysTillExp).First();
+                    articles.OrderBy(pair => pair.Value.soldAmount).First();
 
                 Console.WriteLine("NAJMANJE PRODAVANI ARTIKL:\n");
                 PrintSingleArticle(leastSoldArticle);
@@ -355,8 +367,8 @@ void EditArticles(Dictionary<string, Article> articles)
     int newAmount;
     float newPrice;
     int newDaysTillExpiration;
-    do
-    {
+
+    do{
         stateEditArticles = (int)Loop.TERMINATE;
         Console.WriteLine(
             "OPCIJE - UREĐIVANJA ARTIKALA\n" +
@@ -473,7 +485,7 @@ void AddArticles(Dictionary<string, Article> articles)
         Console.WriteLine("Rok Trajanja u danima (format - cijeli broj):");
         daysTillExpiration = InputNumberFormat();
 
-        article = new Article(amount, price, daysTillExpiration);
+        article = new Article(amount, price, daysTillExpiration, 0);
         PrintSingleArticle(new(name,article));
         Console.WriteLine("POTVRDI UNOS ARTIKLA (da - ZA POTVRDU, ne - PONOVNI UNOS):");
         stateAddArticles = ConfirmationDialogForDataChange();
@@ -582,8 +594,7 @@ void PrintWorkers(Dictionary<string, DateTime> workers)
     string option;
     IEnumerable<KeyValuePair<string, DateTime>> sortedArticlesList = null;
 
-    do
-    {
+    do{
         statePrintOptions = (int)Loop.TERMINATE;
 
         Console.WriteLine(
@@ -669,8 +680,7 @@ void EditWorkers(Dictionary<string, DateTime> workers)
     int stateEditWorkers;
     string workerName;
     DateTime dateOfBirth;
-    do
-    {
+    do{
         stateEditWorkers = (int)Loop.TERMINATE;
 
         Console.WriteLine("Unesi ime radnika kojeg želiš urediti: ");
@@ -710,8 +720,7 @@ void DeleteWorkers(Dictionary<string, DateTime> workers)
     int stateDeleteWorkers;
     string? option;
 
-    do
-    {
+    do{
         Console.WriteLine(
             "OPCIJE - BRISANJE RADNIKA\n" +
             "a - po imenu\r\n" +
@@ -813,7 +822,7 @@ void PrintReceipts(Dictionary<int, (DateTime date, float totalPrice, Dictionary<
             Console.WriteLine(
              $"RAČUN: ID - {Key}\n" +
              $"Datum izdavanja: {Value.date}\n" +
-             $"UKUPNO: {Value.totalPrice} EUR\n" +
+             $"UKUPNO: {Value.totalPrice:0.00} EUR\n" +
              "**********************************\n"
             );
         }
@@ -845,15 +854,16 @@ void PrintReceipts(Dictionary<int, (DateTime date, float totalPrice, Dictionary<
 
 void PrintReceiptWithDetails(int receiptID, (DateTime date, float totalPrice, Dictionary<string,(int,float)>articles) receipt)
 {
-        Console.WriteLine(
-            $"RAČUN: ID - {receiptID}\n" +
-            $"Datum izdavanja: {receipt.date}\n"
-        );
-        PrintReceiptArticles(receipt.articles);
-        Console.WriteLine(
-            $"UKUPNO: {receipt.totalPrice} EUR\n" +
-            "**********************************\n"
-        );
+    Console.WriteLine(
+        $"RAČUN: ID - {receiptID}\n" +
+        $"**********************************\n" +
+        $"Datum izdavanja: {receipt.date}\n"
+    );
+    PrintReceiptArticles(receipt.articles);
+    Console.WriteLine(
+        $"UKUPNO: {receipt.totalPrice:0.00} EUR\n" +
+        "**********************************\n"
+    );
 }
 
 void PrintReceiptArticles(Dictionary<string, (int amount,float price)> receiptArticles)
@@ -867,9 +877,7 @@ void PrintReceiptArticles(Dictionary<string, (int amount,float price)> receiptAr
             $"\tCIJENA: {Value.amount*Value.price} EUR\n"
         );
     }
-  
 }
-
 void AddReceipt(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)>)> receipts)
 {
     int stateAddReceiptItems;
@@ -920,6 +928,7 @@ void AddReceipt(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)
             receiptArticles.Add(articleName, (amount, articlePrice));
             receiptTotalPrice += articlePrice * amount;
             article.amount -= amount;
+            article.soldAmount += amount;
 
             if (article.amount <= 0)
                 articles.Remove(articleName);
@@ -1031,6 +1040,7 @@ int AgeOfWorker(DateTime start)
         (((end.Month > start.Month) ||
         ((end.Month == start.Month) && (end.Day >= start.Day))) ? 1 : 0);
 }
+
 void PrintArticles(Dictionary<string, Article> articles)
 {
     foreach (var article in articles)
@@ -1070,7 +1080,6 @@ void PrintWorkersWithBirthdayInCurrentMonth(Dictionary<string, DateTime> workers
         
     }
 }
-
 void PrintSingleWorker(KeyValuePair<string, DateTime> worker)
 {
     var (name, dateOfBirth) = worker;
@@ -1110,23 +1119,19 @@ int ConfirmationDialogForDataChange()
     return state;
 }
 
-
 public struct Article
 {
     public int amount;
     public float price;
     public int numOfDaysTillExp;
-    public Article(int amout, float price, int numOfDaysTillExp) : this()
+    public int soldAmount;
+    public Article(int amout, float price, int numOfDaysTillExp, int soldAmount) : this()
     {
         this.amount = amout;
         this.price = price;
         this.numOfDaysTillExp = numOfDaysTillExp;
+        this.soldAmount = soldAmount;
     }
-}
-public struct Racun
-{
-    public DateTime dateAndTime;
-    public float price;  
 }
 
 enum Loop
