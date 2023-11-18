@@ -1,9 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
 int selectionMain;
-int selectionArticles;
-int selectionWorkers;
-int selectionReceipts;
-int selectionStatistics;
 int stateMainMenu = (int)Loop.CONTINUE;
 
 Dictionary<string, Article> articles = new (){
@@ -87,9 +83,11 @@ do{
 // **********************************************************************
 void ArticlesMenu(Dictionary<string, Article> articles)
 {
+    int selectionArticles;
     int stateArticles = (int)Loop.CONTINUE;
-
-    do{ 
+    
+    do
+    { 
         Console.WriteLine(
            "IZBORNIK - Artikli\n" +
            "1 - Unos artikla\n" +
@@ -133,6 +131,7 @@ void ArticlesMenu(Dictionary<string, Article> articles)
 // **********************************************************************
 void WorkersMenu(Dictionary<string, DateTime> workers)
 {
+    int selectionWorkers;
     int stateWorkersMenu = (int)Loop.CONTINUE;
     do{
         Console.WriteLine(
@@ -177,6 +176,7 @@ void WorkersMenu(Dictionary<string, DateTime> workers)
 // *********************************************************************
 void ReceiptsMenu(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)> articles)> receipts)
 {
+    int selectionReceipts;
     int stateReceiptsMenu = (int)Loop.CONTINUE;
     do{
         Console.WriteLine(
@@ -213,6 +213,7 @@ void ReceiptsMenu(Dictionary<int, (DateTime, float, Dictionary<string, (int,floa
 // *************************************************************************
 void StatisticsMenu()
 {
+    int selectionStatistics;
     int stateStatisticsMenu = (int)Loop.CONTINUE;
     
     Console.WriteLine("Unesi sifru za pristup: ");
@@ -224,10 +225,9 @@ void StatisticsMenu()
         return;
     }
     Console.Clear();
-    Console.WriteLine("USPJEŠNA PRIJAVA\n\n");
+    Console.WriteLine("USPJEŠNA PRIJAVA!\n");
 
-    do
-    {
+    do{
         Console.WriteLine(
            "IZBORNIK - Statistika\n" +
            "1 - Ukupan broj artikala\n" +
@@ -984,7 +984,7 @@ void StateByMonth()
         Console.WriteLine($"STANJE ZA {month}. {year}. :\n");
         Console.WriteLine($"Ukupna zarada u {month}. {year}. je: {totalProfitByMonth:0.00} EUR");
         Console.WriteLine($"Ukupni iznos plaća svih radnika: {totalSalaries:0.00} EUR");
-        Console.WriteLine($"Ostali troškovi: {restOfExpences}\n");
+        Console.WriteLine($"Ostali troškovi: {restOfExpences:0.00} EUR\n");
 
         float ROI = totalProfitByMonth * (1 / 3) - totalSalaries - restOfExpences;
         Console.WriteLine($"Povrat ulaganja za {month}. {year}: {ROI:0.00} EUR\n");
