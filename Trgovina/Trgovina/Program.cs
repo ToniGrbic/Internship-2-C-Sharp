@@ -50,7 +50,7 @@ do{
     );
     Console.WriteLine("Unesi odabir: ");
     selectionMain = InputNumberFormat();
-
+    Console.Clear();
     switch (selectionMain)
     {
         case 0:
@@ -70,7 +70,7 @@ do{
             StatisticsMenu();
             break;
         default:
-            Console.WriteLine("Pogrešan unos pokušaj ponovo ");
+            Console.WriteLine("Greška, Pogrešan unos, pokusaj ponovo ");
             ContinueAndClearConsole();
             break;
     }
@@ -98,7 +98,7 @@ void ArticlesMenu(Dictionary<string, Article> articles)
         );
         Console.WriteLine("Unesi odabir: ");
         selectionArticles = InputNumberFormat();
-        
+        Console.Clear();
         switch (selectionArticles)
         {
             case 0:
@@ -144,7 +144,7 @@ void WorkersMenu(Dictionary<string, DateTime> workers)
         );
         Console.WriteLine("Unesi odabir: ");
         selectionWorkers = InputNumberFormat();
-        
+        Console.Clear();
         switch (selectionWorkers)
         {
             case 0:
@@ -187,7 +187,7 @@ void ReceiptsMenu(Dictionary<int, (DateTime, float, Dictionary<string, (int,floa
         );
         Console.WriteLine("Unesi odabir: ");
         selectionReceipts = InputNumberFormat();
-
+        Console.Clear();
         switch (selectionReceipts)
         {
             case 0:
@@ -234,7 +234,7 @@ void StatisticsMenu()
            "2 - Vrijednost neprodanih artikala\n" +
            "3 - Vrijednost prodanih artikala\n" +
            "4 - Stanje po mjesecima\n" +
-           "0 - NAZAD NA GLAVNI MENI\n"
+           "0 - NAZAD NA GLAVNI MENI\n\n"
         );
         Console.WriteLine("Unesi odabir: ");
         selectionStatistics = InputNumberFormat();
@@ -293,11 +293,12 @@ void PrintArticlesOptions(Dictionary<string, Article> articles)
             "d - sortirano po količini\n" +
             "e - Najprodavaniji artikl\n" +
             "f - Najmanje prodavan artikl\n" +
-            "exit - POVRATAK NA IZBORNIK ARTIKLI\n"
+            "exit - POVRATAK NA IZBORNIK ARTIKLI\n\n"
         );
 
         Console.WriteLine("Unesi jednu od ponuđenih opcija: ");
         option = Console.ReadLine()?.ToLower();
+        Console.Clear();
 
         switch (option)
         {
@@ -341,14 +342,16 @@ void PrintArticlesOptions(Dictionary<string, Article> articles)
                 break;
         }
 
-        if(option != "e" && option != "f" && statePrintOptions != (int)Loop.CONTINUE){
+        if(option != "e" && option != "f" && statePrintOptions != (int)Loop.CONTINUE)
+        {
             sortedArticles = sortedArticlesList.ToDictionary(pair => pair.Key, pair => pair.Value);
             Console.WriteLine($"ARTIKLI SORTIRANI PREMA OPCIJI {option} :\n");
             PrintArticles(sortedArticles);
+
+            Console.WriteLine("Nastavi na opcije ispisa? (da - Za potvrdu, ne - Povratak na izbornik Artikli)\n");
+            statePrintOptions = ConfirmationDialog();
         }
 
-        Console.WriteLine("Nastavi na opcije ispisa? (da - Za potvrdu, ne - Povratak na izbornik Artikli)\n");
-        statePrintOptions = ConfirmationDialog();
         Console.Clear();
 
     } while (statePrintOptions == (int)Loop.CONTINUE);
@@ -369,10 +372,11 @@ void EditArticles(Dictionary<string, Article> articles)
             "OPCIJE - UREĐIVANJA ARTIKALA\n" +
             "a - Jednog artikla\n" +
             "b - Dodavanje popusta/poskupljenje na sve proizvode\n" +
-            "exit - POVRATAK NA IZBORNIK ARTIKLI\n"
+            "exit - POVRATAK NA IZBORNIK ARTIKLI\n\n"
         );
         Console.WriteLine("Unesi jednu od ponuđenih opcija: ");
         option = Console.ReadLine()?.ToLower();
+        Console.Clear();
         switch (option)
         {
             case "a":
@@ -485,14 +489,17 @@ void AddArticles(Dictionary<string, Article> articles)
         Console.WriteLine("POTVRDI UNOS ARTIKLA (da - ZA POTVRDU, ne - PONOVNI UNOS):");
         stateAddArticles = ConfirmationDialogForDataChange();
 
-        if (stateAddArticles == (int)Loop.CONTINUE){
-            Console.Clear();
-            continue;
+        if (stateAddArticles != (int)Loop.CONTINUE){
+
+            if (!articles.ContainsKey(name)){
+                articles.Add(name, article);
+                Console.WriteLine($"Artikl {name} je uspješno dodan!\n\n");
+            }
+            else {
+                Console.WriteLine($"Greška: Artikl {name} vec postoji u bazi\n");
+            }
         }
 
-        articles.Add(name, article);
-        Console.WriteLine($"Artikl {name} je uspješno dodan!\n\n");
-       
         Console.WriteLine(
             "Nastavi sa novim unosom artikla?\n" +
             "(da - ZA NASTAVAK, ne - POVRATAK NA IZBORNIK ARTILKI): \n"
@@ -512,13 +519,13 @@ void DeleteArticles(Dictionary<string, Article> articles)
             "OPCIJE - BRISANJE ARTIKALA\n" +
             "a - po imenu\n" +
             "b - kojima je istekao rok trajanja\n" +
-            "exit - POVRATAK NA IZBORNIK ARTIKLI"
-
+            "exit - POVRATAK NA IZBORNIK ARTIKLI\n\n"
         );
         stateDeleteArticles = (int)Loop.TERMINATE;
         Console.WriteLine("Unesi jednu od ponuđenih opcija: ");
+        option = Console.ReadLine()?.ToLower();
+        Console.Clear();
 
-        option = Console.ReadLine();
         switch (option)
         {
             case "a":
@@ -533,7 +540,8 @@ void DeleteArticles(Dictionary<string, Article> articles)
                         stateDeleteArticles = (int)Loop.CONTINUE;
                         continue;
                     }
-                    Console.WriteLine($"Potvrdi brisanje artikla {articleName} :\n (da - za nastavak, ne - novi unos)");
+                    PrintSingleArticle(new(articleName, articles[articleName]));
+                    Console.WriteLine($"\nPotvrdi brisanje artikla {articleName} :\n (da - za nastavak, ne - novi unos)");
                     stateDeleteArticles = ConfirmationDialogForDataChange();
 
                     if(stateDeleteArticles == (int)Loop.TERMINATE){
@@ -638,28 +646,25 @@ void AddWorkers(Dictionary<string, DateTime> workers)
     string nameAndSurname;
     DateTime dateOfBirth;
     do{
-      
         Console.WriteLine("Unesi podatke za novog radnika:\n");
-
         Console.WriteLine("Ime i prezime: (format: Ime Prezime)");
         nameAndSurname = InputNonEmptyString();
-
 
         Console.WriteLine("Datum rođenja:\n");
         dateOfBirth = InputDateFormat();
 
-        
         PrintSingleWorker(new(nameAndSurname, dateOfBirth));
         Console.WriteLine("POTVRDI UNOS RADNIKA (da - ZA POTVRDU, ne - PONOVNI UNOS):");
         stateAddWorkers = ConfirmationDialogForDataChange();
 
-        if (stateAddWorkers == (int)Loop.CONTINUE){
-            Console.Clear();
-            continue;
-        }
+        if (stateAddWorkers != (int)Loop.CONTINUE){
 
-        workers.Add(nameAndSurname, dateOfBirth);
-        Console.WriteLine($"Radnik {nameAndSurname} je uspješno dodan!\n");
+            if (!workers.ContainsKey(nameAndSurname)){
+                workers.Add(nameAndSurname, dateOfBirth);
+                Console.WriteLine($"Radnik {nameAndSurname} je uspješno dodan!\n");
+            }else
+                Console.WriteLine($"Greška: Radink {nameAndSurname} vec postoji u bazi\n");
+        }
 
         Console.WriteLine(
             "Nastavi sa novim unosom Radnika?\n" +
@@ -951,6 +956,7 @@ void AddReceipt(Dictionary<int, (DateTime, float, Dictionary<string, (int,float)
 void StateByMonth()
 {
     int loopState;
+    Console.Clear();
     do
     {
         loopState = (int)Loop.CONTINUE;
