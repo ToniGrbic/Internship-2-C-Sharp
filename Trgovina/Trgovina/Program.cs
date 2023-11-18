@@ -850,7 +850,7 @@ void PrintReceipts(Dictionary<int, (DateTime date, float totalPrice, Dictionary<
 void PrintReceiptWithDetails(int receiptID, (DateTime date, float totalPrice, Dictionary<string,(int,float)>articles) receipt)
 {
     Console.WriteLine(
-        $"RAČUN: ID - {receiptID}\n" +
+        $"\nRAČUN: ID - {receiptID}\n" +
         $"**********************************\n" +
         $"Datum izdavanja: {receipt.date}\n"
     );
@@ -869,7 +869,7 @@ void PrintReceiptArticles(Dictionary<string, (int amount,float price)> receiptAr
         Console.WriteLine(
             $"\tIME: {Key}\n" +
             $"\tKOLIČINA: {Value.amount}\n" +
-            $"\tCIJENA: {Value.amount*Value.price} EUR\n"
+            $"\tCIJENA: {Value.amount*Value.price}:0.00 EUR\n"
         );
     }
 }
@@ -968,9 +968,11 @@ void StateByMonth()
         float restOfExpences = InputFloatFormat();
         Console.WriteLine("Potvrdi unos podataka? (da - ispis stanja, ne - ponovni unos)");
 
-        if (ConfirmationDialog() != 0)
+        if (ConfirmationDialog() != 0){
+            Console.Clear();
             continue;
-
+        }
+            
         Console.WriteLine("************************************\n");
         float totalProfitByMonth = 0.0f;
         foreach (var (Key, Value) in receipts)
@@ -979,9 +981,10 @@ void StateByMonth()
                 totalProfitByMonth += Value.totalPrice;
         }
 
-        Console.WriteLine($"Ukupna zarada u {month}. {year}. je: {totalProfitByMonth:0.00} EUR\n");
-        Console.WriteLine($"Ukupni iznos plaća svih radnika: {totalSalaries:0.00} EUR\n");
-        Console.WriteLine($"Ostali troškovi: {restOfExpences}\n\n");
+        Console.WriteLine($"STANJE ZA {month}. {year}. :\n");
+        Console.WriteLine($"Ukupna zarada u {month}. {year}. je: {totalProfitByMonth:0.00} EUR");
+        Console.WriteLine($"Ukupni iznos plaća svih radnika: {totalSalaries:0.00} EUR");
+        Console.WriteLine($"Ostali troškovi: {restOfExpences}\n");
 
         float ROI = totalProfitByMonth * (1 / 3) - totalSalaries - restOfExpences;
         Console.WriteLine($"Povrat ulaganja za {month}. {year}: {ROI:0.00} EUR\n");
@@ -992,7 +995,7 @@ void StateByMonth()
 
         Console.WriteLine(
               "nasatavi sa provjerom iduceg stanja?\n" +
-              "(da - NASTAVAK, ne - povratak na meni STATISTIKA\n"
+              "(da - NASTAVAK, ne - povratak na meni STATISTIKA):\n"
         );
         loopState = ConfirmationDialog();
         Console.Clear();
@@ -1181,7 +1184,7 @@ void PrintSingleWorker(KeyValuePair<string, DateTime> worker)
     var (name, dateOfBirth) = worker;
     Console.WriteLine(
         $"WORKER {name} : \n" +
-        $"Date of Birth: {dateOfBirth}\n"
+        $"Date of Birth: {dateOfBirth.ToShortDateString()}\n"
     );
 }
 
