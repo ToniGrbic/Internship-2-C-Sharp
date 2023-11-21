@@ -1,4 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using System;
+
 int selectionMain;
 int stateMainMenu = (int)Loop.CONTINUE;
 
@@ -348,10 +350,10 @@ void PrintArticlesOptions(Dictionary<string, Article> articles)
             Console.WriteLine($"ARTIKLI SORTIRANI PREMA OPCIJI {option} :\n");
             PrintArticles(sortedArticles);
 
-            Console.WriteLine("Nastavi na opcije ispisa? (da - Za potvrdu, ne - Povratak na izbornik Artikli)\n");
-            statePrintOptions = ConfirmationDialog();
+           
         }
-
+        Console.WriteLine("Nastavi na opcije ispisa? (da - Za potvrdu, ne - Povratak na izbornik Artikli)\n");
+        statePrintOptions = ConfirmationDialog();
         Console.Clear();
 
     } while (statePrintOptions == (int)Loop.CONTINUE);
@@ -595,7 +597,6 @@ void PrintWorkers(Dictionary<string, DateTime> workers)
 {
     int statePrintOptions;
     string option;
-    IEnumerable<KeyValuePair<string, DateTime>> sortedArticlesList = null;
 
     do{
         statePrintOptions = (int)Loop.TERMINATE;
@@ -608,7 +609,7 @@ void PrintWorkers(Dictionary<string, DateTime> workers)
         );
 
         Console.WriteLine("Unesi jednu od ponuđenih opcija: ");
-        option = Console.ReadLine()?.ToLower();
+        option = Console.ReadLine().ToLower();
 
         switch (option)
         {
@@ -645,14 +646,20 @@ void AddWorkers(Dictionary<string, DateTime> workers)
     int stateAddWorkers;
     string nameAndSurname;
     DateTime dateOfBirth;
+    bool success;
+
     do{
         Console.WriteLine("Unesi podatke za novog radnika:\n");
         Console.WriteLine("Ime i prezime: (format: Ime Prezime)");
         nameAndSurname = InputNonEmptyString();
-
-        Console.WriteLine("Datum rođenja:\n");
-        dateOfBirth = InputDateFormat();
-
+        do{
+            Console.WriteLine("Datum rođenja:\n");
+            dateOfBirth = InputDateFormat();
+            success = AgeOfWorker(dateOfBirth) > 18;
+            if(!success)
+                Console.WriteLine("Greska: Dob radnika mora bit minimalno 18 godina, pokušajte ponovo\n");
+        } while (!success);
+        
         PrintSingleWorker(new(nameAndSurname, dateOfBirth));
         Console.WriteLine("POTVRDI UNOS RADNIKA (da - ZA POTVRDU, ne - PONOVNI UNOS):");
         stateAddWorkers = ConfirmationDialogForDataChange();
@@ -1055,9 +1062,10 @@ int InputNumberFormat()
     int number = 0;
     bool success;
     do{
-        success = int.TryParse(Console.ReadLine(), out number);
+        success = int.TryParse(Console.ReadLine(), out number) && number >=0;
+       
         if (!success)
-            Console.WriteLine("Greška: Neispravni format za cjeli broj, pokušaj ponovo...");
+            Console.WriteLine("Greška: Neispravni format za cjeli pozitivni broj, pokušaj ponovo...");
     } while (!success);
     return number;
 }
@@ -1090,19 +1098,19 @@ DateTime InputDateFormat()
 {
     int year, month, day;
     bool success;
+    DateTime date;
 
     year = InputYear();
     month = InputMonth();
 
-    do{
-        Console.WriteLine("DAN (prihvatiljive vrijednosti: 01-31): ");
-        day = InputNumberFormat();
-        success = (day >= 1) && (day <= 31);
-        if (!success)
-            Console.WriteLine($"Greška: {day} nije prihvatljiva vrijednost za DAN, pokušaj ponovo\n");
+    do {
+       Console.WriteLine("DAN (prihvatiljive vrijednosti: 01 - 30 ili 31): ");
+       day = InputNumberFormat();
+       success = DateTime.TryParse(year + "-" + month + "-" + day, out date);
+       if (!success)
+                Console.WriteLine($"Greška: {day}. nije prihvatljiva vrijednost za DAN, pokušaj ponovo\n");
     } while (!success);
-    
-    DateTime date = new DateTime(year, month, day);
+
     return date;
 }
 
@@ -1143,7 +1151,8 @@ int AgeOfWorker(DateTime start)
     DateTime end = DateTime.Now;
     return (end.Year - start.Year - 1) +
         (((end.Month > start.Month) ||
-        ((end.Month == start.Month) && (end.Day >= start.Day))) ? 1 : 0);
+         ((end.Month == start.Month) && 
+          (end.Day >= start.Day))) ? 1 : 0);
 }
 
 void PrintArticles(Dictionary<string, Article> articles)
